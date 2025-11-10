@@ -1,0 +1,9 @@
+include README.md
+include requirements.txt
+include *.ps1
+include *.bat
+include *.yaml
+recursive-include tests *.py
+global-exclude *.pyc
+global-exclude __pycache__
+global-exclude .git*
