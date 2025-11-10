@@ -119,6 +119,7 @@ IMG_9346/
 *.mp4
 *.mov
 *.m4v
+chronogrid-video-processor-*.zip
 *_chronogrid.jpg
 *_analysis.txt
 *_analysis.json
