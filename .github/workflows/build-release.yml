@@ -28,9 +28,17 @@ jobs:
         run: |
           pyinstaller chronogrid.spec --clean
 
-      - name: Check build output
+      - name: Verify build output
         shell: pwsh
-        run: Get-ChildItem dist\
+        run: |
+          if (Test-Path "dist/chronogrid.exe") {
+            Write-Host "✓ chronogrid.exe found"
+            Get-Item "dist/chronogrid.exe" | Select-Object Name, Length
+          } else {
+            Write-Host "✗ chronogrid.exe NOT found"
+            Get-ChildItem dist/
+            exit 1
+          }
 
       - name: Zip executable
         shell: pwsh
@@ -39,7 +47,8 @@ jobs:
           if (Test-Path $zipPath) {
             Remove-Item $zipPath -Force
           }
-          Compress-Archive -Path "dist\chronogrid.exe" -DestinationPath $zipPath -Force
+          Compress-Archive -Path "dist/chronogrid.exe" -DestinationPath $zipPath -Force
+          Write-Host "Created: $zipPath"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
