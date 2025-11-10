@@ -17,7 +17,7 @@ if (this_directory / "requirements.txt").exists():
 
 setup(
     name="chronogrid-video-processor",
-    version="1.0.0",
+    version="1.0.2",
     author="Chronogrid Team",
     author_email="",
     description="Generate chronogrids from videos with AI analysis",

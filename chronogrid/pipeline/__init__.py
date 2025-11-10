@@ -74,7 +74,7 @@ class APTPipeline:
 
             final_result = {
                 'success': True,
-                'pipeline_version': '1.0.0',
+                'pipeline_version': '1.0.2',
                 'execution_time': str(duration),
                 'start_time': start_time.isoformat(),
                 'end_time': end_time.isoformat(),

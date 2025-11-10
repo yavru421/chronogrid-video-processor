@@ -27,7 +27,7 @@ python -m chronogrid <video_file.mp4> [options]
 ```
 
 ## Versioning
-- Current version: 1.0.0
+- Current version: 1.0.2
 - Follows semantic versioning (MAJOR.MINOR.PATCH)
 
 ## License
