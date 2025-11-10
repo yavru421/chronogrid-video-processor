@@ -26,17 +26,18 @@ jobs:
 
       - name: Build exe with PyInstaller
         run: |
-          pyinstaller chronogrid.spec --clean
+          pyinstaller chronogrid.spec --clean --onefile
 
       - name: Verify build output
         shell: pwsh
         run: |
+          Write-Host "Contents of dist folder:"
+          Get-ChildItem dist/ -Recurse
           if (Test-Path "dist/chronogrid.exe") {
             Write-Host "✓ chronogrid.exe found"
             Get-Item "dist/chronogrid.exe" | Select-Object Name, Length
           } else {
-            Write-Host "✗ chronogrid.exe NOT found"
-            Get-ChildItem dist/
+            Write-Host "✗ chronogrid.exe NOT found in dist/"
             exit 1
           }
 
