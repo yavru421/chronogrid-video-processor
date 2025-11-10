@@ -26,7 +26,7 @@ jobs:
 
       - name: Build exe with PyInstaller
         run: |
-          pyinstaller chronogrid.spec --clean --onefile
+          pyinstaller chronogrid.spec --clean
 
       - name: Verify build output
         shell: pwsh

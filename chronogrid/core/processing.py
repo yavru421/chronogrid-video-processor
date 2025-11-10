@@ -18,7 +18,7 @@ from typing import Any, Dict, Iterable, List, Sequence, Tuple
 
 from PIL import Image
 
-from llama_api_client import LlamaAPIClient
+from chronogrid.core.api_client import LlamaAPIClient
 
 logger = logging.getLogger(__name__)
 
