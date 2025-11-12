@@ -1,4 +1,4 @@
-name: Build Windows EXE
+name: Debug Windows Build
 
 on:
   push:
@@ -6,13 +6,23 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  debug-build:
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Log system info
+      run: |
+        echo "=== SYSTEM INFO ===" >> debug.log
+        systeminfo | findstr /c:"OS" >> debug.log
+        wmic cpu get name >> debug.log
+        wmic memphysical get capacity >> debug.log
+        echo "Disk space:" >> debug.log
+        dir C:\ | findstr /c:"bytes free" >> debug.log
+        type debug.log
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -20,38 +30,82 @@ jobs:
         python-version: '3.11'
         cache: 'pip'
 
-    - name: Install FFmpeg
+    - name: Log Python info
       run: |
-        choco install ffmpeg --version=7.0.1 --no-progress
-        ffmpeg -version
+        echo "=== PYTHON INFO ===" >> debug.log
+        python --version >> debug.log
+        python -c "import sys; print(f'Python path: {sys.path[:3]}')" >> debug.log
+        pip --version >> debug.log
+        type debug.log
 
-    - name: Install Python dependencies
+    - name: Test basic PyInstaller
       run: |
-        python -m pip install --upgrade pip
-        pip install wheel
-        pip install PyQt5 --only-binary all
-        pip install numpy opencv-python Pillow requests flask pyyaml python-dotenv aiohttp rich --only-binary all
-        pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu --only-binary all
-        pip install pyinstaller
+        echo "=== PYINSTALLER TEST ===" >> debug.log
+        pip install pyinstaller >> debug.log 2>&1
+        pyinstaller --version >> debug.log 2>&1
+        echo "PyInstaller installed successfully" >> debug.log
+        type debug.log
 
-    - name: Verify files exist
+    - name: Test PyQt5 install
+      continue-on-error: true
       run: |
-        dir outputs\
-        dir prompts\
-        type src\chronogrid\interfaces\gui.py | findstr /c:"PyQt5" | head -1
+        echo "=== PYQT5 INSTALL TEST ===" >> debug.log
+        pip install PyQt5 --only-binary all >> debug.log 2>&1
+        python -c "import PyQt5; print('PyQt5 imported successfully')" >> debug.log 2>&1
+        type debug.log
 
-    - name: Build EXE
+    - name: Test numpy/opencv install
+      continue-on-error: true
       run: |
-        pyinstaller --onefile --windowed --name chronogrid-gui.exe src/chronogrid/interfaces/gui.py --hidden-import PyQt5.QtCore --hidden-import PyQt5.QtWidgets --hidden-import PyQt5.QtGui --hidden-import numpy --hidden-import cv2 --hidden-import torch
+        echo "=== NUMPY/OPENCV INSTALL TEST ===" >> debug.log
+        pip install numpy opencv-python --only-binary all >> debug.log 2>&1
+        python -c "import numpy, cv2; print('numpy/cv2 imported successfully')" >> debug.log 2>&1
+        type debug.log
 
-    - name: Check build output
+    - name: Test torch install
+      continue-on-error: true
       run: |
-        dir dist\
-        if exist dist\chronogrid-gui.exe (echo EXE created successfully) else (echo EXE not found && exit 1)
+        echo "=== TORCH INSTALL TEST ===" >> debug.log
+        pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu --only-binary all >> debug.log 2>&1
+        python -c "import torch; print('torch imported successfully')" >> debug.log 2>&1
+        type debug.log
 
-    - name: Upload EXE
+    - name: Check source files
+      run: |
+        echo "=== SOURCE FILES CHECK ===" >> debug.log
+        if exist src\chronogrid\interfaces\gui.py (
+          echo "GUI file exists" >> debug.log
+          type src\chronogrid\interfaces\gui.py | findstr /c:"PyQt5" | head -1 >> debug.log
+        ) else (
+          echo "GUI file NOT found" >> debug.log
+        )
+        type debug.log
+
+    - name: Attempt simple build
+      continue-on-error: true
+      run: |
+        echo "=== SIMPLE BUILD ATTEMPT ===" >> debug.log
+        pyinstaller --onefile --windowed --name test-gui src/chronogrid/interfaces/gui.py >> debug.log 2>&1
+        if exist dist\test-gui.exe (
+          echo "Simple build succeeded" >> debug.log
+        ) else (
+          echo "Simple build failed" >> debug.log
+        )
+        type debug.log
+
+    - name: Upload debug log
+      if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: chronogrid-gui-exe
-        path: dist/chronogrid-gui.exe
+        name: debug-log
+        path: debug.log
+        retention-days: 30
+
+    - name: Upload any build artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: any-build-output
+        path: dist/
+        if-no-files-found: ignore
         retention-days: 30
