@@ -1,0 +1,136 @@
+# Chronogrid Monetization Plan
+
+## Overview
+✅ IMPLEMENTED: Freemium model for Chronogrid desktop application:
+- Free tier: Unlimited chronogrid generation
+- Premium tier: Unlimited AI analysis ($49 one-time license)
+
+## Technical Implementation
+
+### License System
+✅ IMPLEMENTED: Cryptographic license keys using HMAC-SHA256
+✅ IMPLEMENTED: Store license locally in user config directory
+✅ IMPLEMENTED: Validate license before allowing AI analysis
+✅ IMPLEMENTED: Limit free tier to 5 AI analyses per month
+
+### Payment Processing
+✅ IMPLEMENTED: Stripe Payment Links for license purchases
+✅ IMPLEMENTED: Manual license key generation and delivery
+✅ IMPLEMENTED: Secure key generation script (scripts/generate_license.py)
+
+### User Experience
+✅ IMPLEMENTED: In-app prompts for license when hitting free limits
+✅ IMPLEMENTED: License key input dialog via GUI menu
+✅ IMPLEMENTED: Clear upgrade messaging and status display
+
+## Implementation Steps
+
+✅ 1. Add license validation module (src/chronogrid/core/licensing.py)
+✅ 2. Modify AI analysis functions to check license (src/chronogrid/core/processing.py)
+✅ 3. Create license key generation system (scripts/generate_license.py)
+✅ 4. Update GUI with monetization prompts (src/chronogrid/interfaces/gui.py)
+✅ 5. Test freemium limits and license validation
+
+## Files Modified
+- src/chronogrid/core/processing.py (added license checks)
+- src/chronogrid/interfaces/gui.py (added upgrade prompts and menu)
+- src/chronogrid/core/licensing.py (NEW)
+- scripts/generate_license.py (NEW)
+- src/chronogrid/__init__.py (added licensing exports)
+
+## Distribution
+- **Option 1 - Gumroad (Selected)**: Use Gumroad for automated digital delivery
+  - Upload license keys as digital files after generation
+  - Gumroad handles payment processing and delivery
+  - No manual work per customer
+
+### Gumroad Setup Instructions
+
+1. **Create Gumroad Account**
+   - Go to https://gumroad.com and sign up
+   - Verify your email and set up payout method
+
+2. **Create Product**
+   - Click "Create product"
+   - Product name: "Chronogrid Pro License - $49"
+   - Price: $49 USD (one-time)
+   - Description: "Unlock unlimited AI analysis in Chronogrid. One-time license key delivered instantly."
+
+3. **Configure Digital Delivery**
+   - In product settings, enable "Digital product"
+   - Set delivery method to "Download"
+   - Upload license key files (see below)
+
+4. **Generate License Files for Upload** ✅ IMPLEMENTED
+   - Run batch generation: `python scripts/generate_license.py --gumroad 100`
+   - This creates 100 license files in `gumroad_licenses/` folder
+   - Each file contains just the license key (for instant download)
+
+5. **Upload to Gumroad**
+   - Upload all files from `gumroad_licenses/` to Gumroad product
+   - Gumroad will randomly assign one file per purchase
+   - Customer gets instant download of their unique license key
+
+6. **Share Sales Link**
+   - Get the Gumroad product URL
+   - Share this link for sales (handles payments and delivery automatically)- **Option 2 - Stripe + Batch Processing**: Use Stripe Payment Links
+  - Export customer emails from Stripe dashboard
+  - Batch generate licenses: `python scripts/generate_license.py --batch customers.csv`
+  - Send bulk emails with license keys
+
+- **Option 3 - Direct Sales**: Sell via website with Stripe integration
+  - Use batch processing for weekly/monthly license generation
+  - Reduces manual work to batch operations instead of per-customer
+
+## Batch License Generation
+The license script supports batch processing:
+```bash
+# Create orders.csv with: email,order_id
+# Then run:
+python scripts/generate_license.py --batch orders.csv
+# Outputs orders_licenses.csv with generated keys
+```
+
+This reduces manual work from per-customer to weekly batch processing.
+
+## APT Publishing Pipeline
+✅ IMPLEMENTED: Automated multi-platform publishing system
+- CLI tool: `apt_publish.py chronogrid.yml`
+- Supports: Gumroad, Itch.io, Paddle, GitHub
+- Parallel async uploads with rich console output
+- Environment-based API key configuration
+- Unified results table with URLs and SKUs
+
+### Setup Instructions
+1. **Run Automated Setup**: `python setup_gumroad.py`
+   - Opens browser to: https://app.gumroad.com/settings/applications
+   - Guides you through application creation
+   - Prompts for access token securely
+   - Tests API connection automatically
+   - Saves configuration to .env file
+2. **If URL doesn't work**: Run `python troubleshoot_gumroad.py`
+3. **Alternative Manual Setup**: Follow `GUMROAD_SETUP.md`
+4. **Test Connection**: `python test_gumroad_api.py`
+5. **Run Publisher**: `python apt_publish.py chronogrid.yml`
+
+### Manifest Format (chronogrid.yml)
+```yaml
+name: Chronogrid Forensic Suite
+version: 1.0.0
+description: |
+  Professional video analysis tool...
+price: 49.99
+files:
+  - build/chronogrid-gui-new/chronogrid-gui-new.exe
+images:
+  - screenshots/screen1.png
+tags: [AI, Video, Forensics]
+```
+
+### API Key Requirements
+- **Gumroad**: Access token from https://gumroad.com/settings/applications
+  - Follow: https://gumroad.com/help/article/280-create-application-api
+  - Create new application → Generate access token
+- **Itch.io**: API key + username + game slug
+- **Paddle**: API key + product ID
+- **GitHub**: Personal access token with repo permissions

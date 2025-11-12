@@ -1,0 +1,9 @@
+You are analyzing a 4x4 chronogrid of 16 frames from wildlife footage for behavioral research. Examine animal behavior, interactions, and environmental context. Describe ONLY what is visually present. Identify:
+
+- Animal species, individuals, and group dynamics
+- Behavioral actions: feeding, mating, territorial displays, movement patterns
+- Environmental interactions: habitat features, weather conditions
+- Temporal sequence: behavior progression, event triggers
+- Notable biological observations or adaptations visible
+
+Focus on ethological insights. End with a behavioral timeline documenting the observed sequence.

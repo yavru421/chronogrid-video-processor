@@ -1,0 +1,19 @@
+name: Chronogrid Forensic Suite
+version: 1.0.0
+description: |
+  Professional video analysis tool powered by AI. Generate chronogrids, perform forensic analysis,
+  and extract insights from video footage with unlimited AI-powered analysis capabilities.
+
+  Features:
+  - Chronogrid generation for temporal analysis
+  - AI-powered forensic video analysis
+  - Multi-platform support (Windows, macOS, Linux)
+  - Professional-grade video processing
+price: 49.99
+files:
+  - build/chronogrid-gui-new/chronogrid-gui-new.exe
+  - build/chronogrid-gui-pyqt/chronogrid-gui-pyqt.exe
+images:
+  - screenshots/chronogrid_main.png
+  - screenshots/analysis_results.png
+tags: [AI, Video, Forensics, Analysis, Professional]

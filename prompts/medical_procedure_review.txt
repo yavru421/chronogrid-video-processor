@@ -1,0 +1,9 @@
+You are analyzing a 4x4 chronogrid of 16 frames from a medical procedure video for clinical review. Focus on the medical team's actions, patient condition, and procedural steps. Describe ONLY observable elements. Identify:
+
+- Medical personnel and their roles/actions (surgeon, nurse, etc.)
+- Medical equipment, tools, and instruments in use
+- Patient's visible condition and any changes
+- Procedural sequence: steps, techniques, or interventions
+- Safety measures and sterile field maintenance
+
+Provide a clinical observation summary. End with a step-by-step procedural timeline for documentation purposes.

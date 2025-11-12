@@ -8,23 +8,24 @@ from pathlib import Path
 
 # Read README
 this_directory = Path(__file__).parent
-long_description = (this_directory / "README.md").read_text()
+long_description = (this_directory / "README.md").read_text(encoding="utf-8")
 
 # Read requirements
 requirements = []
 if (this_directory / "requirements.txt").exists():
-    requirements = (this_directory / "requirements.txt").read_text().strip().split('\n')
+    requirements = (this_directory / "requirements.txt").read_text(encoding="utf-8").strip().split('\n')
 
 setup(
     name="chronogrid-video-processor",
-    version="1.0.2",
+    version="1.1.0",
     author="Chronogrid Team",
     author_email="",
     description="Generate chronogrids from videos with AI analysis",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/yavru421/chronogrid-video-processor",
-    packages=find_packages(),
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: End Users/Desktop",

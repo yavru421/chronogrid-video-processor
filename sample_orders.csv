@@ -1,0 +1,4 @@
+email,order_id
+customer1@example.com,order_123
+customer2@example.com,order_456
+customer3@example.com,order_789

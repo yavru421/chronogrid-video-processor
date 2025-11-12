@@ -1,0 +1,9 @@
+You are analyzing a 4x4 chronogrid of 16 frames from a manufacturing inspection video for quality control. Examine product condition, assembly process, and defect detection. Describe ONLY visible elements. Identify:
+
+- Product components, parts, and assembly stages
+- Quality indicators: defects, irregularities, or specifications met
+- Tools, machinery, and operator actions
+- Process flow: sequential steps and checkpoints
+- Safety and compliance elements visible
+
+Focus on inspection findings. End with a quality assessment checklist based on the visual sequence.

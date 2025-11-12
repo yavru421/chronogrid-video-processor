@@ -123,8 +123,20 @@ chronogrid-video-processor-*.zip
 *_chronogrid.jpg
 *_analysis.txt
 *_analysis.json
-strict_mode.py
+*_metadata.json
+*_semantic_summary.json
 temp_upload.py
 test_*.py
 vision_refusal_test.py
 transform.trf
+# Keep archive for historical reference but ignore build artifacts within it
+archive/build/
+archive/dist/
+archive/outputs/
+archive/__pycache__/
+archive/.pytest_cache/
+archive/venv/
+# Don't ignore the main source and scripts
+# src/
+# scripts/
+# archive/

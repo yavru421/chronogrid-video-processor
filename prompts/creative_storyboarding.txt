@@ -1,0 +1,9 @@
+You are analyzing a 4x4 chronogrid of 16 frames from creative footage for storyboarding purposes. Examine visual composition, narrative elements, and artistic techniques. Describe ONLY what is visually present. Identify:
+
+- Characters, settings, and visual motifs
+- Camera angles, lighting, and cinematographic choices
+- Narrative progression: story beats, emotional arcs
+- Artistic elements: color, composition, symbolism
+- Creative techniques: transitions, effects, or stylistic choices
+
+Focus on storytelling potential. End with a storyboard sequence outlining scene progression.

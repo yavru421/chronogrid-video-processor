@@ -4,6 +4,8 @@ include *.ps1
 include *.bat
 include *.yaml
 recursive-include tests *.py
+include outputs/0001-0300.gif
+recursive-include prompts *.txt
 global-exclude *.pyc
 global-exclude __pycache__
 global-exclude .git*

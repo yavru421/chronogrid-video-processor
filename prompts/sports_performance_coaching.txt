@@ -1,0 +1,9 @@
+You are analyzing a 4x4 chronogrid of 16 frames from a sports performance video for coaching purposes. Examine the athlete's technique, form, and execution. Describe ONLY what is visually present. Identify:
+
+- Athlete's body positioning, posture, and movement mechanics
+- Equipment usage and interaction (balls, bats, gear)
+- Key technique elements: stance, swing, throw, or motion phases
+- Performance progression: improvements, errors, or repetitions
+- Environmental factors: court/field conditions, lighting, angles
+
+Focus on actionable coaching insights from the visual sequence. End with a bullet list of technique observations and potential improvement areas.
