@@ -1,16 +1,14 @@
-name: Build and Package Chronogrid
+name: Build Windows EXE
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  release:
-    types: [published]
+  workflow_dispatch:
 
 jobs:
-  build-windows:
+  build:
     runs-on: windows-latest
+    timeout-minutes: 30
 
     steps:
     - name: Checkout code
@@ -20,74 +18,40 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
+        cache: 'pip'
 
     - name: Install FFmpeg
       run: |
-        choco install ffmpeg-full
+        choco install ffmpeg --version=7.0.1 --no-progress
         ffmpeg -version
 
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pyinstaller==6.3.0
-        pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+        pip install wheel
+        pip install PyQt5 --only-binary all
+        pip install numpy opencv-python Pillow requests flask pyyaml python-dotenv aiohttp rich --only-binary all
+        pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu --only-binary all
+        pip install pyinstaller
 
-    - name: Install project in development mode
-      run: pip install -e .
-
-    - name: Verify data files exist
+    - name: Verify files exist
       run: |
-        if (!(Test-Path "outputs/0001-0300.gif")) { throw "Missing outputs/0001-0300.gif" }
-        if (!(Test-Path "prompts")) { throw "Missing prompts directory" }
-        Get-ChildItem prompts/ | Select-Object -First 3
+        dir outputs\
+        dir prompts\
+        type src\chronogrid\interfaces\gui.py | findstr /c:"PyQt5" | head -1
 
-    - name: Build executable with PyInstaller
-      run: pyinstaller --clean chronogrid-gui-new.spec
-
-    - name: Verify build succeeded
+    - name: Build EXE
       run: |
-        if (!(Test-Path "dist/chronogrid-gui-new/chronogrid-gui-new.exe")) { throw "EXE not found" }
-        Get-Item "dist/chronogrid-gui-new/chronogrid-gui-new.exe" | Select-Object Length
+        pyinstaller --onefile --windowed --name chronogrid-gui.exe src/chronogrid/interfaces/gui.py --hidden-import PyQt5.QtCore --hidden-import PyQt5.QtWidgets --hidden-import PyQt5.QtGui --hidden-import numpy --hidden-import cv2 --hidden-import torch
 
-    - name: Upload executable artifact
+    - name: Check build output
+      run: |
+        dir dist\
+        if exist dist\chronogrid-gui.exe (echo EXE created successfully) else (echo EXE not found && exit 1)
+
+    - name: Upload EXE
       uses: actions/upload-artifact@v4
       with:
-        name: chronogrid-gui-windows
-        path: dist/chronogrid-gui-new/
-
-    - name: Create version info
-      run: |
-        echo "Build completed at $(Get-Date)" > build-info.txt
-        echo "Python version: $(python --version)" >> build-info.txt
-        echo "PyInstaller version: $(pyinstaller --version)" >> build-info.txt
-        $size = (Get-ChildItem dist/chronogrid-gui-new/ -Recurse | Where-Object { !$_.PSIsContainer } | Measure-Object -Property Length -Sum).Sum
-        "Total size: $([math]::Round($size / 1MB, 2)) MB" >> build-info.txt
-
-    - name: Upload build info
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-info
-        path: build-info.txt
-
-  release:
-    needs: build-windows
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release'
-
-    steps:
-    - name: Download executable
-      uses: actions/download-artifact@v4
-      with:
-        name: chronogrid-gui-windows
-
-    - name: Create ZIP archive
-      run: |
-        zip -r chronogrid-gui-${{ github.event.release.tag_name }}-windows.zip .
-
-    - name: Upload release asset
-      uses: softprops/action-gh-release@v1
-      with:
-        files: chronogrid-gui-${{ github.event.release.tag_name }}-windows.zip
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        name: chronogrid-gui-exe
+        path: dist/chronogrid-gui.exe
+        retention-days: 30
