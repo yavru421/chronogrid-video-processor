@@ -12,6 +12,8 @@ import shutil
 import subprocess
 import sys
 import textwrap
+import urllib.request
+import zipfile
 
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -111,9 +113,160 @@ def check_ffmpeg() -> bool:
         return False
 
 
+def get_ffmpeg_path() -> str:
+    """Get the path to ffmpeg executable, checking downloaded version first."""
+    # First check if ffmpeg is in PATH
+    if check_ffmpeg():
+        return "ffmpeg"
+
+    # Check for downloaded version
+    user_data_dir = Path.home() / ".chronogrid" / "ffmpeg"
+    ffmpeg_bin = user_data_dir / "ffmpeg"
+    if ffmpeg_bin.exists():
+        return str(ffmpeg_bin)
+
+    # Fallback to system PATH (should not reach here if ensure_ffmpeg was called)
+    return "ffmpeg"
+
+
+def get_ffprobe_path() -> str:
+    """Get the path to ffprobe executable, checking downloaded version first."""
+    # First check if ffprobe is in PATH
+    try:
+        subprocess.run(
+            ["ffprobe", "-version"],
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        return "ffprobe"
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        pass
+
+    # Check for downloaded version
+    user_data_dir = Path.home() / ".chronogrid" / "ffmpeg"
+    ffprobe_bin = user_data_dir / "ffprobe"
+    if ffprobe_bin.exists():
+        return str(ffprobe_bin)
+
+    # Fallback to system PATH
+    return "ffprobe"
+
+
+def download_ffmpeg() -> bool:
+    """Download and extract FFmpeg binaries if not available."""
+    try:
+        # Determine platform
+        import platform
+        system = platform.system().lower()
+        machine = platform.machine().lower()
+
+        if system == "windows":
+            if "64" in machine or "amd64" in machine:
+                ffmpeg_url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
+                ffmpeg_dir = "ffmpeg-7.0.1-essentials_build"
+            else:
+                # 32-bit Windows - use older version that supports 32-bit
+                ffmpeg_url = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
+                ffmpeg_dir = "ffmpeg-7.0.1-essentials_build"
+        elif system == "linux":
+            if "64" in machine or "x86_64" in machine:
+                ffmpeg_url = "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz"
+                ffmpeg_dir = "ffmpeg-7.0.1-amd64-static"
+            else:
+                ffmpeg_url = "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-i686-static.tar.xz"
+                ffmpeg_dir = "ffmpeg-7.0.1-i686-static"
+        elif system == "darwin":  # macOS
+            if "arm64" in machine or "aarch64" in machine:
+                ffmpeg_url = "https://evermeet.cx/ffmpeg/ffmpeg-7.0.1.zip"
+                ffmpeg_dir = "ffmpeg"
+            else:
+                ffmpeg_url = "https://evermeet.cx/ffmpeg/ffmpeg-7.0.1.zip"
+                ffmpeg_dir = "ffmpeg"
+        else:
+            logger.error(f"Unsupported platform: {system} {machine}")
+            return False
+
+        # Create ffmpeg directory in user data
+        user_data_dir = Path.home() / ".chronogrid"
+        ffmpeg_path = user_data_dir / "ffmpeg"
+        ffmpeg_path.mkdir(parents=True, exist_ok=True)
+
+        print("Downloading FFmpeg... This may take a few minutes.")
+
+        # Download the archive
+        archive_path = ffmpeg_path / "ffmpeg_temp.zip"
+        if system == "linux":
+            archive_path = ffmpeg_path / "ffmpeg_temp.tar.xz"
+
+        try:
+            with urllib.request.urlopen(ffmpeg_url) as response:
+                with open(archive_path, 'wb') as f:
+                    shutil.copyfileobj(response, f)
+        except Exception as e:
+            logger.error(f"Failed to download FFmpeg: {e}")
+            return False
+
+        # Extract the archive
+        try:
+            if system == "windows" or system == "darwin":
+                with zipfile.ZipFile(archive_path, 'r') as zip_ref:
+                    zip_ref.extractall(ffmpeg_path)
+            else:  # Linux
+                import tarfile
+                with tarfile.open(archive_path, 'r:xz') as tar_ref:
+                    tar_ref.extractall(ffmpeg_path)
+
+            # Move binaries to correct location
+            extracted_dir = ffmpeg_path / ffmpeg_dir
+            if extracted_dir.exists():
+                for item in extracted_dir.iterdir():
+                    if item.is_file():
+                        shutil.move(str(item), str(ffmpeg_path))
+                    else:
+                        # For directories, move contents up
+                        for subitem in item.iterdir():
+                            if subitem.is_file():
+                                shutil.move(str(subitem), str(ffmpeg_path))
+
+            # Clean up
+            archive_path.unlink(missing_ok=True)
+            if extracted_dir.exists():
+                shutil.rmtree(extracted_dir)
+
+            # Make sure binaries are executable
+            for binary in ["ffmpeg", "ffprobe"]:
+                bin_path = ffmpeg_path / binary
+                if bin_path.exists():
+                    bin_path.chmod(0o755)
+
+            print("FFmpeg downloaded successfully!")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to extract FFmpeg: {e}")
+            archive_path.unlink(missing_ok=True)
+            return False
+
+    except Exception as e:
+        logger.error(f"FFmpeg download failed: {e}")
+        return False
+
+
 def ensure_ffmpeg() -> None:
     if not check_ffmpeg():
-        raise RuntimeError("ffmpeg is required but was not found in PATH")
+        print("FFmpeg not found. Attempting to download...")
+        if not download_ffmpeg():
+            raise RuntimeError(
+                "FFmpeg is required but could not be found or downloaded. "
+                "Please install FFmpeg manually from https://ffmpeg.org/download.html"
+            )
+        # Verify download worked
+        if not check_ffmpeg():
+            raise RuntimeError(
+                "FFmpeg download completed but binaries are not accessible. "
+                "Please install FFmpeg manually from https://ffmpeg.org/download.html"
+            )
 
 
 def iter_video_files(inputs: Sequence[str]) -> Iterable[Path]:
@@ -145,7 +298,7 @@ def list_video_files(directory: str | Path = ".") -> List[str]:
 def detect_hardware_acceleration() -> List[str]:
     try:
         result = subprocess.run(
-            ["ffmpeg", "-hwaccels"],
+            [get_ffmpeg_path(), "-hwaccels"],
             check=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -185,7 +338,7 @@ def get_optimal_ffmpeg_args(
         filter_name = "aresample=async=1:min_hard_comp=0.100000"
         try:
             result = subprocess.run(
-                ["ffmpeg", "-hide_banner", "-filters"],
+                [get_ffmpeg_path(), "-hide_banner", "-filters"],
                 check=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
@@ -203,7 +356,7 @@ def get_optimal_ffmpeg_args(
 
 def get_video_metadata(video_path: str | Path) -> Dict[str, Any]:
     cmd = [
-        "ffprobe",
+        get_ffprobe_path(),
         "-v",
         "quiet",
         "-print_format",
@@ -231,7 +384,7 @@ _SCENE_PATTERN = re.compile(r"pts_time:(?P<pts>[0-9.]+)")
 
 def detect_scenes(video_path: str | Path, threshold: float = 0.3) -> Tuple[int, List[str], List[float]]:
     cmd = [
-        "ffmpeg",
+        get_ffmpeg_path(),
         "-hide_banner",
         "-loglevel",
         "error",
@@ -284,7 +437,7 @@ def extract_frames(video_path: Path, output_dir: Path, frame_step: int, timestam
         for i, ts in enumerate(timestamps):
             output_file = output_dir / f"{video_path.stem}_{i+1:04d}.jpg"
             cmd = [
-                "ffmpeg",
+                get_ffmpeg_path(),
                 "-y",
                 "-hide_banner",
                 "-loglevel",
@@ -303,7 +456,7 @@ def extract_frames(video_path: Path, output_dir: Path, frame_step: int, timestam
     else:
         pattern = output_dir / f"{video_path.stem}_%04d.jpg"
         cmd = [
-            "ffmpeg",
+            get_ffmpeg_path(),
             "-hide_banner",
             "-loglevel",
             "error",
@@ -525,7 +678,7 @@ def generate_audio_spectrogram(
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     cmd = [
-        "ffmpeg",
+        get_ffmpeg_path(),
         "-hide_banner",
         "-loglevel",
         "error",
