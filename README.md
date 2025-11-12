@@ -38,6 +38,21 @@ python -m pip install -r requirements.txt
 python -m chronogrid.interfaces.cli --help
 ```
 
+Option C: Download pre-built executable (Windows only)
+
+Download the latest `chronogrid-gui-windows.zip` from [Releases](https://github.com/yavru421/chronogrid-video-processor/releases). Extract and run `chronogrid-gui-new.exe`.
+
+## Building from Source
+
+To build the Windows executable locally:
+
+```powershell
+pip install pyinstaller
+.\build_exe.bat
+```
+
+The executable will be created in `dist/chronogrid-gui-new/`.
+
 ## Usage
 
 CLI (installed):
