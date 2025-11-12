@@ -1,8 +1,8 @@
 @echo off
 echo Building Chronogrid GUI...
 echo Installing dependencies...
-pip install PyQt5 numpy opencv-python Pillow requests flask pyyaml python-dotenv aiohttp rich
+pip install PyQt5 Pillow requests flask pyinstaller
 echo Building executable...
-pyinstaller --onefile --windowed --exclude-module PyQt6 --exclude-module PyQt6.Qt6 --exclude-module PyQt6.sip --name chronogrid-gui.exe src/chronogrid/interfaces/gui.py --hidden-import PyQt5.QtCore --hidden-import PyQt5.QtWidgets --hidden-import PyQt5.QtGui --hidden-import numpy --hidden-import cv2
+pyinstaller --onefile --windowed --exclude-module PyQt6 --exclude-module PyQt6.Qt6 --exclude-module PyQt6.sip --name chronogrid-gui.exe src/chronogrid/interfaces/gui.py --hidden-import PyQt5.QtCore --hidden-import PyQt5.QtWidgets --hidden-import PyQt5.QtGui
 echo Build complete! Check dist/ folder
 pause
