@@ -21,11 +21,11 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install PyQt5 numpy opencv-python Pillow requests flask pyyaml python-dotenv aiohttp rich torch torchvision pyinstaller
+        pip install PyQt5 numpy opencv-python Pillow requests flask pyyaml python-dotenv aiohttp rich pyinstaller
 
     - name: Build executable
       run: |
-        pyinstaller --onefile --windowed --exclude-module PyQt6 --exclude-module PyQt6.Qt6 --exclude-module PyQt6.sip --name chronogrid-gui.exe src/chronogrid/interfaces/gui.py --hidden-import PyQt5.QtCore --hidden-import PyQt5.QtWidgets --hidden-import PyQt5.QtGui --hidden-import numpy --hidden-import cv2 --hidden-import torch
+        pyinstaller --onefile --windowed --exclude-module PyQt6 --exclude-module PyQt6.Qt6 --exclude-module PyQt6.sip --name chronogrid-gui.exe src/chronogrid/interfaces/gui.py --hidden-import PyQt5.QtCore --hidden-import PyQt5.QtWidgets --hidden-import PyQt5.QtGui --hidden-import numpy --hidden-import cv2
 
     - name: Upload executable
       uses: actions/upload-artifact@v4
