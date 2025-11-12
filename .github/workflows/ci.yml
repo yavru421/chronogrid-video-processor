@@ -25,11 +25,11 @@ jobs:
 
     - name: Build executable
       run: |
-        pyinstaller --onefile --windowed --exclude-module PyQt6 --exclude-module PyQt6.Qt6 --exclude-module PyQt6.sip --name chronogrid-gui.exe src/chronogrid/interfaces/gui.py --hidden-import PyQt5.QtCore --hidden-import PyQt5.QtWidgets --hidden-import PyQt5.QtGui
+        pyinstaller --onefile --windowed --exclude-module PyQt6 --exclude-module PyQt6.Qt6 --exclude-module PyQt6.sip src/chronogrid/interfaces/gui.py --hidden-import PyQt5.QtCore --hidden-import PyQt5.QtWidgets --hidden-import PyQt5.QtGui
 
     - name: Upload executable
       uses: actions/upload-artifact@v4
       with:
         name: chronogrid-gui-windows
-        path: dist/chronogrid-gui.exe
+        path: dist/gui.exe
         retention-days: 30
