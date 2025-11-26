@@ -1,5 +1,8 @@
 
-# Chronogrid Video Processor
+<img width="1024" height="1024" alt="ChatGPT Image Nov 8, 2025, 08_35_25 AM" src="https://github.com/user-attachments/assets/ffa5c071-6d42-4581-805f-617487a852af" />
+
+# Chronogrid 
+Video Processor
 
 Chronogrid turns your video into a single chronological grid image and (optionally) sends that grid to a vision model for analysis. It ships with:
 
